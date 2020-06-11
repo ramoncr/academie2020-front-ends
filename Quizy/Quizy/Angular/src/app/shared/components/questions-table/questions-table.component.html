@@ -1,0 +1,29 @@
+<div class="row">
+    <div class="twelve columns">
+      <table id="questions-table">
+        <thead>
+          <tr>
+            <th id="question-id">#</th>
+            <th id="question-content">Content</th>
+            <th id="question-description">Description</th>
+            <th id="question-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let question of questions">
+            <td>{{ question.id }}</td>
+            <td>{{ question.content }}</td>
+            <td>{{ question.description }}</td>
+            <td>
+              <button (click)="deleteQuestion.emit(question)">
+                <i class="material-icons">delete</i>
+              </button>
+              <button (click)="editQuestion.emit(question)">
+                <i class="material-icons">edit</i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>

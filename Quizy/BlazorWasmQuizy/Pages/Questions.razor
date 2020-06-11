@@ -1,0 +1,103 @@
+﻿@page "/questions"
+
+@inject NavigationManager navigationManager
+@inject AppData AppData
+@inject IJSRuntime JSRuntime;
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject QuestionService questionService
+@inject ParticipantService participantService
+
+@if (Participant != null && currentQuestion != null)
+{
+    <aside>Your Score: @Participant.Score points.</aside>
+    <section class="question">
+        <h2>@currentQuestion.Content <small>@(Participant.QuestionsAnswered+1)/@questions!.Count</small></h2>
+        @if (!string.IsNullOrWhiteSpace(currentQuestion.Image))
+        {
+            <picture><img src="@currentQuestion.Image" height="315" /></picture>
+        }
+        @if (!string.IsNullOrWhiteSpace(currentQuestion.Video))
+        {
+            <picture>
+                <iframe src="@currentQuestion.Video" width="560" height="315"
+                        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen
+                        title="Question Video"></iframe>
+            </picture>
+        }
+        @if (!string.IsNullOrWhiteSpace(currentQuestion.Description))
+        {
+            <p>@currentQuestion.Description</p>
+        }
+    </section>
+    <section>
+        @foreach (var answer in currentQuestion.Answers)
+        {
+            <p>
+                <input type="radio" id="@answer.Id" value="@answer.Id" name="@currentQuestion.Id" checked="@(currentAnswer==answer)" @onchange="OnChange" /><label for="@answer.Id">@answer.Text</label>
+            </p>
+        }
+        <input disabled="@(currentAnswer==null)" type="submit" value="Submit Answer" @onclick="Submit" />
+    </section>
+
+
+}
+@code {
+    IReadOnlyList<Question>? questions = null;
+    Question? currentQuestion;
+    Answer? currentAnswer;
+    Participant? Participant => AppData!.Participant;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Participant != null) await GetQuestions();
+    }
+
+    async Task GetQuestions()
+    {
+        questions = questionService.Items.ToList();
+        SetCurrentQuestion();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Participant == null)
+        {
+            var participantId = await localStorage.GetItemAsync<int?>("currentParticipant");
+            if (participantId == null)
+            {
+                navigationManager.NavigateTo("/register");
+                return;
+            }
+            AppData!.Participant = participantService.Items.Last();
+            await GetQuestions();
+        }
+    }
+
+    void OnChange(ChangeEventArgs args)
+        => currentAnswer = currentQuestion!.Answers.First(a => a.Id.ToString() == args.Value.ToString());
+
+    async void Submit(MouseEventArgs args)
+    {
+        Participant!.Score += currentAnswer!.Score;
+        Participant!.QuestionsAnswered++;
+        await SetCurrentQuestion();
+    }
+
+    async Task SetCurrentQuestion()
+    {
+        currentAnswer = null;
+        if (questions!.Count == Participant!.QuestionsAnswered)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"That was the last question; Your score was: {Participant.Score}; You will be logged out.");
+            AppData.Participant = null;
+            await localStorage.RemoveItemAsync("currentParticipant");
+            navigationManager.NavigateTo("/register");
+            return;
+        }
+
+        currentQuestion = Participant == null || questions == null || questions.Count <= Participant.QuestionsAnswered
+        ? null
+        : questions[Participant.QuestionsAnswered];
+        StateHasChanged();
+    }
+}

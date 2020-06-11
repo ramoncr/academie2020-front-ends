@@ -1,0 +1,5 @@
+<div class="text-input">
+  <label [for]="id">{{ label }}</label>
+  <input class="u-full-width" type="text" [placeholder]="placeholder" [id]="id" [ngModel]="value"
+    (ngModelChange)="valueChange.emit($event)" />
+</div>

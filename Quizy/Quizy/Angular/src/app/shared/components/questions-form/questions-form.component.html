@@ -1,0 +1,47 @@
+<div class="row">
+  <div class="twelve columns" *ngIf="question">
+    <app-text-input [(value)]="question.content" [id]="'question-content'" placeholder="Example question?"
+      label="Content"></app-text-input>
+    <app-text-input [(value)]="question.description" [id]="'question-description'"
+      placeholder="A description for the question" label="Description"></app-text-input>
+    <app-text-input [(value)]="question.image" [id]="'question-image'"
+      placeholder="https://image.src/cute-animal.png" label="Image URL"></app-text-input>
+    <app-text-input [(value)]="question.video" [id]="'question-video'"
+      placeholder="https://www.youtube.com/embed/FeJKJ5MoCHY" label="Video Embed URL"></app-text-input>
+
+    <hr />
+    <h3>Answers</h3>
+    <div class="row">
+      <div class="eight columns">
+        <app-text-input [(value)]="question.answers[0].text" [id]="'question-answer-0-text'"
+          placeholder="The answer" label="Answer 1"></app-text-input>
+      </div>
+      <div class="four columns">
+        <app-number-input [(value)]="question.answers[0].score" [id]="'question-answer-0-score'" placeholder="300"
+          label="Score"></app-number-input>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="eight columns">
+        <app-text-input [(value)]="question.answers[1].text" [id]="'question-answer-1-text'"
+          placeholder="The answer" label="Answer 2"></app-text-input>
+      </div>
+      <div class="four columns">
+        <app-number-input [(value)]="question.answers[1].score" [id]="'question-answer-1-score'" placeholder="300"
+          label="Score"></app-number-input>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="eight columns">
+        <app-text-input [(value)]="question.answers[2].text" [id]="'question-answer-2-text'"
+          placeholder="The answer" label="Answer 3"></app-text-input>
+      </div>
+      <div class="four columns">
+        <app-number-input [(value)]="question.answers[2].score" [id]="'question-answer-2-score'" placeholder="300"
+          label="Score"></app-number-input>
+      </div>
+    </div>
+  </div>
+</div>

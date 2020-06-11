@@ -1,0 +1,46 @@
+﻿@page "/register"
+@using System.Timers
+
+@inject ParticipantService ParticipantService
+@inject AppData AppData
+@inject NavigationManager navigationManager
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+
+<h1>Register</h1>
+<p> Welcome to this cool quiz tool! Please put in you information below to get started with quizing! </p>
+<div>
+    <label for="name">Your name</label><ThrottledInput id="name" placeholder="John Doe" @bind-value="participantName" @onchange="OnChange" @onkeydown="OnKeyDown" />
+    <button disabled="@blockSubmit" @onclick="Login">Submit</button>
+</div>
+
+@code {
+    string? participantName { get; set; }
+    bool blockSubmit = true;
+
+    protected override void OnInitialized()
+    {
+        participantName = AppData.Participant?.Name;
+    }
+
+    private void OnChange(ChangeEventArgs args)
+    {
+        blockSubmit = string.IsNullOrWhiteSpace(participantName) || ParticipantService.Items.Any(p => p.Name == participantName);
+    }
+
+    void OnKeyDown(KeyboardEventArgs e)
+    {
+        blockSubmit = true;
+    }
+
+    async void Login()
+    {
+        InvokeAsync(async () =>
+        {
+            var participant = new Participant { Name = participantName };
+            ParticipantService.Add(participant);
+            AppData.Participant = participant;
+            await localStorage.SetItemAsync("currentParticipant", participant.Id);
+            navigationManager.NavigateTo("/questions");
+        });
+    }
+}

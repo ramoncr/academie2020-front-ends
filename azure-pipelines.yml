@@ -1,0 +1,113 @@
+# ASP.NET
+# Build and test ASP.NET projects.
+# Add steps that publish symbols, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
+trigger: 
+- master
+
+stages: 
+- stage: Build
+  displayName: Build back-ends
+  jobs:
+  - job: Build
+
+    pool:
+      vmImage: 'windows-latest'
+    variables:
+      solution: '**/*.sln'
+      buildPlatform: 'Any CPU'
+      buildConfiguration: 'Release'
+    steps:
+    - task: NuGetToolInstaller@1
+
+    - task: NuGetCommand@2
+      inputs:
+        restoreSolution: '$(solution)'
+    - task: Npm@1
+      displayName: NPM Install Angular
+      condition: eq(variables['BuildFE'], 'true')
+      inputs:
+        command: 'install'
+        workingDir: 'Quizy\Quizy\Angular'
+    - task: Npm@1
+      displayName: NPM Build Angular
+      condition: eq(variables['BuildFE'], 'true')
+      inputs:
+        command: 'custom'
+        workingDir: 'Quizy\Quizy\Angular'
+        customCommand: 'run build:prod'
+
+    - task: Npm@1
+      displayName: NPM Install Vue
+      condition: eq(variables['BuildFE'], 'true')
+      inputs:
+        command: 'install'
+        workingDir: 'Quizy\Quizy\Vue'
+    - task: Npm@1
+      displayName: NPM Build Vue
+      condition: eq(variables['BuildFE'], 'true')
+      inputs:
+        command: 'custom'
+        workingDir: 'Quizy\Quizy\Vue'
+        customCommand: 'run build'
+
+    - task: Npm@1
+      displayName: NPM Install React
+      condition: eq(variables['BuildFE'], 'true')
+      inputs:
+        command: 'install'
+        workingDir: 'Quizy\Quizy\React'
+    - task: Npm@1
+      displayName: NPM Build React
+      condition: eq(variables['BuildFE'], 'true')
+      inputs:
+        command: 'custom'
+        workingDir: 'Quizy\Quizy\React'
+        customCommand: 'run build'
+
+    - task: VSBuild@1
+      inputs:
+        solution: '$(solution)'
+        msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
+        platform: '$(buildPlatform)'
+        configuration: '$(buildConfiguration)'
+    - publish: $(Build.ArtifactStagingDirectory)/Quizy.zip
+      artifact: Quizy
+    - publish: $(Build.ArtifactStagingDirectory)/BlazorQuizy.zip
+      artifact: BlazorQuizy
+- stage: Deploy_FE
+  displayName: Deployment Angular, React, Vue
+  dependsOn: Build
+  jobs:
+  - job: Release
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - download: current
+      artifact: Quizy
+    - task: AzureRmWebAppDeployment@4
+      inputs:
+        ConnectionType: 'AzureRM'
+        azureSubscription: 'Visual Studio Enterprise(7c9e38d2-d2de-4a22-85c4-d99ddae17651)'
+        appType: 'webApp'
+        WebAppName: 'ac20-fe'
+        packageForLinux: '$(Pipeline.Workspace)/Quizy/Quizy.zip'
+
+- stage: Deploy_BL
+  displayName: Deployment Blazor
+  dependsOn: Build
+  jobs:
+  - job: Release
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - download: current
+      artifact: BlazorQuizy
+    - task: AzureRmWebAppDeployment@4
+      inputs:
+        ConnectionType: 'AzureRM'
+        azureSubscription: 'Visual Studio Enterprise(7c9e38d2-d2de-4a22-85c4-d99ddae17651)'
+        appType: 'webApp'
+        WebAppName: 'ac20-blazor'
+        packageForLinux: '$(Pipeline.Workspace)/BlazorQuizy/BlazorQuizy.zip'
+  

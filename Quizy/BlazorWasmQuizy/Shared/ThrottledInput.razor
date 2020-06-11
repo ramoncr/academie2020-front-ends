@@ -1,0 +1,53 @@
+﻿@using System.Timers
+
+<input id="@id" type="text" placeholder="@placeholder" @bind-value="value" @bind-value:event="oninput" @onkeydown="OnKeyDown" autocomplete="@autocomplete">
+
+
+@code {
+
+    Timer timer = new Timer(200) { AutoReset = false };
+
+    protected override void OnInitialized()
+    {
+        timer.Elapsed += (o, a) => InvokeAsync(() => onchange.InvokeAsync(new ChangeEventArgs { Value = _value }));
+    }
+
+    [Parameter]
+    public string id { get; set; } = "";
+
+    [Parameter]
+    public string placeholder { get; set; } = "";
+
+    [Parameter]
+    public string autocomplete { get; set; } = "off";
+
+    private string _value = "";
+
+    [Parameter]
+    public string @value
+    {
+        get => _value;
+        set
+        {
+            InvokeAsync(()=>
+            {
+                if (value != _value)
+                {
+                    _value = value;
+                    valueChanged.InvokeAsync(_value);
+                    timer.Stop();
+                    timer.Start();
+                }
+            });
+        }
+    }
+
+    [Parameter]
+    public EventCallback<string> valueChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<KeyboardEventArgs> OnKeyDown { get; set; }
+
+    [Parameter]
+    public EventCallback<ChangeEventArgs> onchange { get; set; }
+}

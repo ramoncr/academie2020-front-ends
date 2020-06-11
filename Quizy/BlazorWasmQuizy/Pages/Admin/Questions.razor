@@ -1,0 +1,53 @@
+﻿@page "/admin-questions"
+
+@inject NavigationManager navigationManager
+@inject AppData AppData
+@inject QuestionService questionService
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+<h1>Question Management</h1>
+<button @onclick="CreateQuestion">Create new question</button>
+<table class="questions">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Content</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var (question, index) in questionService.Items.Select((q, i) => (q, i + 1)))
+        {
+            <tr>
+                <td>@index</td>
+                <td>@question.Content</td>
+                <td>@question.Description</td>
+                <td><button @onclick="()=>DeleteQuestion(question)">🗑</button><button @onclick="()=>EditQuestion(question)">✎</button></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AppData.IsAdmin) navigationManager.NavigateTo("/");
+        await Task.CompletedTask;
+    }
+
+    async void CreateQuestion(MouseEventArgs args)
+    {
+        navigationManager.NavigateTo("/admin-questions/create");
+    }
+
+    async void DeleteQuestion(Question question)
+    {
+        questionService.Delete(question);
+    }
+
+    async void EditQuestion(Question question)
+    {
+        navigationManager.NavigateTo($"/admin-questions/{question.Id}");
+    }
+
+}

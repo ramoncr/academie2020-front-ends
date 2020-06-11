@@ -1,0 +1,38 @@
+﻿@using Microsoft.AspNetCore.Components.Routing
+@inject BlazorWasmQuizy.Models.AppData AppData
+@inject NavigationManager navigationManager
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+
+<nav>
+    <ul>
+        <li class="logo"><a href="/">Quizy</a></li>
+        <li class="menu"><NavLink href="/questions">Questions</NavLink></li>
+        <li class="menu"><NavLink href="/about">About</NavLink></li>
+        <li class="menu"><a @onclick="Admin">Admin</a></li>
+        @if (AppData.Participant != null)
+        {
+            <li class="logout"><a @onclick="Logout">Logout @AppData.Participant.Name</a></li>
+        }
+    </ul>
+</nav>
+
+@code {
+    protected override void OnInitialized()
+    {
+        AppData.Changed += StateHasChanged;
+    }
+
+    protected async void Admin(MouseEventArgs args)
+    {
+        var isAdmin = 1 == await localStorage.GetItemAsync<int>("isAdmin");
+        AppData.IsAdmin = isAdmin;
+        if (isAdmin) navigationManager.NavigateTo("/admin-questions");
+    }
+
+    void Logout(MouseEventArgs args)
+    {
+        AppData.Participant = null;
+        localStorage.RemoveItemAsync("currentParticipant");
+        navigationManager.NavigateTo("/register");
+    }
+}

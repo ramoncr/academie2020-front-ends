@@ -1,0 +1,90 @@
+﻿@page "/admin-questions/{QuestionId}"
+
+@inject NavigationManager navigationManager
+@inject AppData AppData
+@inject QuestionService questionService
+
+<h1>Edit the question</h1>
+<section class="question">
+    <div>
+        <label for="content">Content</label>
+        <input id="content" placeholder="Example question?" @bind-value="currentQuestion.Content" @bind-value:event="oninput" type="text" />
+    </div>
+    <div>
+        <label for="description">Description</label>
+        <input id="description" placeholder="A description for the question" @bind-value="currentQuestion.Description" type="text" />
+    </div>
+    <div>
+        <label for="image">Image URL</label>
+        <input id="image" placeholder="https://image.src/cute-animal.png" @bind-value="currentQuestion.Image" type="text" />
+    </div>
+    <div>
+        <label for="video">Video Embed URL</label>
+        <input id="video" placeholder="https://www.youtube.com/embed/FeJKJ5MoCHY" @bind-value="currentQuestion.Video" type="text" />
+    </div>
+</section>
+<h3>Answers</h3>
+<section class="answers">
+    <table>
+        <tbody>
+            @foreach (var (answer, index) in currentQuestion.Answers.Select((a, i) => (a, i + 1)))
+            {
+                <tr>
+                    <td>
+                        <div>
+                            <label for="@($"text{index}")">Answer @index</label>
+                            <input id="@($"text{index}")" @bind-value="answer.Text" type="text" />
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <label for="@($"score{index}")">Score</label>
+                            <input id="@($"score{index}")" @bind-value="answer.Score" type="number" />
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>
+<button @onclick="Cancel">Cancel</button>
+<button class="default" @onclick="Save" disabled="@(string.IsNullOrWhiteSpace(currentQuestion.Content))">Save</button>
+@code {
+    [Parameter]
+    public string QuestionId { get; set; }
+
+    Question currentQuestion = new Question
+    {
+        Answers = new List<Answer>
+    {
+            new Answer(), new Answer(), new Answer()
+        }
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AppData.IsAdmin)
+        {
+            navigationManager.NavigateTo("/");
+        }
+        if (int.TryParse(QuestionId, out int id))
+        {
+            currentQuestion = questionService.Items.First();
+        }
+    }
+
+    async void Save(MouseEventArgs mouse)
+    {
+        if (currentQuestion.Id == 0)
+        {
+            questionService.Add(currentQuestion);
+        }
+        navigationManager.NavigateTo("/admin-questions");
+    }
+
+    async void Cancel(MouseEventArgs mouse)
+    {
+        navigationManager.NavigateTo("/admin-questions");
+    }
+}
+

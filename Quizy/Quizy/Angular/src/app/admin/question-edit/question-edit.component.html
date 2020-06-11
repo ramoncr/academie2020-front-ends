@@ -1,0 +1,10 @@
+<div class="container">
+    <h1>Edit the question</h1>
+    <app-questions-form [(question)]="question"></app-questions-form>
+    <button (click)="cancel()">Cancel</button>
+    <button (click)="save()" class="button-primary u-pull-right"
+      [disabled]="!question?.content">
+      Save
+    </button>
+  </div>
+  

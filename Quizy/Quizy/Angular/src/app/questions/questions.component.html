@@ -1,0 +1,53 @@
+<div class="container">
+ 
+  <div class="row" id="score-row" *ngIf="participant$ | async">
+    <div class="six columns">
+      Your score: {{ (participant$ | async).score }} points
+    </div>
+  </div>
+  <ng-container *ngIf="(currentQuestion$ | async) as currentQuestion">
+    <div class="row">
+      <div class="twelve columns">
+        <h2>
+          {{ currentQuestion.content }}
+          <small>
+            {{ (participant$ | async).questionsAnswered + 1 }}/
+            {{ (questions$ | async).length }}
+          </small>
+        </h2>
+      </div>
+    </div>
+    <div class="row" *ngIf="currentQuestion && currentQuestion.image">
+      <div class="twelve columns">
+        <img [src]="currentQuestion.image" height="315" alt="qi" />
+      </div>
+    </div>
+    <div class="row" *ngIf="currentQuestion && currentQuestion.video">
+      <div class="twelve columns">
+        <iframe [src]="currentQuestion.video | safeUrl" width="560" height="315"
+          allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen
+          title="Question Video"></iframe>
+      </div>
+    </div>
+    <div class="row" *ngIf="currentQuestion">
+      <div class="twelve columns">
+        <p>{{ currentQuestion.description }}</p>
+      </div>
+    </div>
+    <div class="row" *ngIf="currentQuestion">
+      <div class="twelve columns">
+        <label *ngFor="let answer of currentQuestion.answers">
+          <input type="radio" [value]="answer.id" [(ngModel)]="givenAnswer" name="answer" />
+          <span class="label-body">{{ answer.text }}</span>
+        </label>
+      </div>
+    </div>
+    <div class="row">
+      <div class="twelve columns">
+        <button [disabled]="!givenAnswer" (click)="submitAnswer(currentQuestion)">
+          Submit Answer
+        </button>
+      </div>
+    </div>
+  </ng-container>
+</div>

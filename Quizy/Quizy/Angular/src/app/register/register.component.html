@@ -1,0 +1,25 @@
+<div class="container">
+    <div class="row">
+        <div class="twelve columns">
+            <h1>Register</h1>
+            <p>
+                Welcome to this cool quiz tool! Please put in you information below to
+                get started with quizing!
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="twelve columns">
+            <label for="exampleEmailInput">Your name</label>
+            <input [formControl]="nameControl" class="u-full-width" type="text" placeholder="John Doe" id="nameInput"/>
+            <div *ngIf="nameControl.touched && nameControl.invalid && !nameControl.errors.userNameIsAvailable" class="color-red">
+                Name is already in use
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="twelve columns">
+            <button [disabled]="nameControl.invalid" (click)="submit()">Submit</button>
+        </div>
+    </div>
+</div>

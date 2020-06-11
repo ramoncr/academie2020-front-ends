@@ -1,0 +1,12 @@
+<div id="nav">
+  <div class="container">
+    <a [routerLink]="['/']" id="header-title">Quizy</a>
+    <a [routerLink]="['/questions']">Questions</a>
+    <a [routerLink]="['/about']">About</a>
+    <a [routerLink]="['/admin/questions']">Admin</a>
+    <div id="currentUser" class="u-pull-right" *ngIf="participant" (click)="logoutClick.emit()">
+      Logout
+      {{ participant.name }}
+    </div>
+  </div>
+</div>

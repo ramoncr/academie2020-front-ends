@@ -1,0 +1,6 @@
+<div class="container">
+  <h1>Question Management</h1>
+  <button (click)="createQuestion()">Create new question</button>
+  <app-questions-table [questions]="questions | async" (deleteQuestion)="deleteQuestion($event)"
+    (editQuestion)="editQuestion($event)"></app-questions-table>
+</div>
